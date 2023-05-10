@@ -1,0 +1,70 @@
+# filename redis-crd.yaml
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  # 名字需要与 spec 字段匹配，并且格式为 '<名称的负数形式>.<组名>'
+  name: redises.qwoptcontroller.k8s.io
+  annotations:
+    "k8s.io/code-generator": "v0.27.1"
+    # 必须annotations，因为 https://github.com/kubernetes/enhancements/pull/1111
+    "api-approved.kubernetes.io": "unapproved only-test; This is only needed if the CRD group is k8s.io, kubernetes.io, or ends with .k8s.io, .kubernetes.io." 
+spec:
+  # 组名称，用于 Rest api: /apis/<组名>/<版本> 
+  group: qwoptcontroller.k8s.io
+  # 列出该 CRD 支持的所有版本
+  versions:
+    - name: v1beta1
+      # 每个版本可以通过 served 标志来单独开启或关闭
+      served: true
+      # 其中一个且只有一个版本被标记为存储版本
+      storage: true
+      schema:
+        # 资源结构体字段
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                # 镜像
+                image:
+                  type: string
+                # redis 端口
+                port:
+                  type: integer
+                # targetPort，在创建 redis 资源时自动创建 headless server
+                targetPort:
+                  type: integer
+                # redis 的认证密码
+                password:
+                  type: string
+            # 状态结构体
+            status:
+              type: object
+              properties:
+                # redis 主地址，"10.10.10.10"
+                active:
+                  type: string
+                # redis 从地址，数组 ["10.10.10.11", "10.10.10.12"]
+                standby:
+                  items:
+                    type: string
+                  type: array
+                # Redis 状态，""|Running|Destroying|Destroyed
+                state:
+                  type: string
+              required:
+              - active
+              - standby
+              - state
+  names:
+    kind: Redis
+    # 资源名字的复数形式，用于 Rest api: /apis/<组名>/<版本>/<名字复数形式>
+    plural: redises
+    # 资源名字的单数形式，用于命令行使用和显示的别名
+    singular: redis
+    # 简写
+    shortNames:
+    - rds
+  # 可以是 Namespaced 或 Cluster
+  scope: Namespaced

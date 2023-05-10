@@ -1,0 +1,11 @@
+# filename redis.yaml
+apiVersion: qwoptcontroller.k8s.io/v1beta1
+kind: Redis
+metadata:
+  name: redis-cluster
+  namespace: default
+spec:
+  image: redis:5.0
+  port: 6379
+  targetPort: 16379
+  password: "123456"
